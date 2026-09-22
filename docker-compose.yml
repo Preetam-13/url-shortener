@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: url-shortener-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: urluser
+      POSTGRES_PASSWORD: urlpassword
+      POSTGRES_DB: urlshortener
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urluser -d urlshortener"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: url-shortener-redis
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: url-shortener-api
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL: postgresql://urluser:urlpassword@postgres:5432/urlshortener
+      REDIS_HOST: redis
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
