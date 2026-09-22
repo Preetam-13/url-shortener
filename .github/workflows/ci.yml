@@ -12,6 +12,35 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: urluser
+          POSTGRES_PASSWORD: urlpassword
+          POSTGRES_DB: urlshortener
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U urluser -d urlshortener"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://urluser:urlpassword@localhost:5432/urlshortener
+      REDIS_HOST: localhost
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
