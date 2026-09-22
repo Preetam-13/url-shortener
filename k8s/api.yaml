@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-shortener-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url-shortener-api
+
+  template:
+    metadata:
+      labels:
+        app: url-shortener-api
+
+    spec:
+      containers:
+        - name: api
+          image: preetammm13/urlshortener-api:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8000
+
+          # Check whether the application is ready to receive traffic
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          # Check whether the application is still alive
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+
+          # Application configuration
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortener-secret
+                  key: DATABASE_URL
+
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: url-shortener-config
+                  key: REDIS_HOST
+
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortener-secret
+                  key: JWT_SECRET_KEY
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-shortener-api
+
+spec:
+  selector:
+    app: url-shortener-api
+
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+  type: NodePort

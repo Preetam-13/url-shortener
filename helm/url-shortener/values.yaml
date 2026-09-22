@@ -1,0 +1,49 @@
+replicaCount: 2
+
+api:
+  image:
+    repository: preetammm13/urlshortener-api
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: NodePort
+    port: 8000
+    targetPort: 8000
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 20
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16"
+
+  service:
+    port: 5432
+
+  storage:
+    size: 1Gi
+
+redis:
+  image:
+    repository: redis
+    tag: "7"
+
+  service:
+    port: 6379
+
+config:
+  redisHost: redis
+  postgresHost: postgres
+  postgresDatabase: urlshortener
+  postgresUser: urluser
+
+secrets:
+  databaseUrl: postgresql://urluser:urlpassword@postgres:5432/urlshortener
+  jwtSecretKey: change-this-secret

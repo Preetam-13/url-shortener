@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: url-shortener-config
+data:
+  REDIS_HOST: "redis"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_DB: "urlshortener"
+  POSTGRES_USER: "urluser"

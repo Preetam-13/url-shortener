@@ -8,6 +8,7 @@ from jose import jwt, JWTError
 import secrets
 import string
 import json
+import os
 
 from argon2 import PasswordHasher
 
@@ -47,7 +48,10 @@ security = HTTPBearer()
 # JWT CONFIGURATION
 # ==========================================
 
-JWT_SECRET_KEY = "change-this-secret-key"
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY",
+    "change-this-secret-key"
+)
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_MINUTES = 60
 
@@ -285,7 +289,7 @@ def login_user(request: UserLogin):
             JWT_SECRET_KEY,
             algorithm=JWT_ALGORITHM
         )
-        
+
         return {
             "access_token": access_token,
             "token_type": "bearer"

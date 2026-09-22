@@ -31,3 +31,6 @@ Thumbs.db
 
 # Database backups
 *.sql
+
+# Kubernetes secrets
+k8s/secret.yaml
